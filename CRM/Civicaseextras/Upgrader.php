@@ -406,12 +406,13 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
   public function upgrade_1001() {
     $customGroup = $this->createStatsCustomGroup();
     $durationField = $this->createDurationCustomField($customGroup);
+
     $this->createCaseDurationLogTable();
     $this->buildDurationLog();
     $this->calculateCasesDuration($customGroup, $durationField);
     $this->createCaseDurationScheduledJob();
 
-    return false;
+    return TRUE;
   }
 
   /**
