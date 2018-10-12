@@ -1,0 +1,30 @@
+{
+  "name": "uk.co.compucorp.civicaseextras",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx gulp test"
+  },
+  "semistandard": {
+    "globals": [
+      "CRM",
+      "angular",
+      "inject",
+      "moment"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/compucorp/uk.co.compucorp.civicaseexrtas.git"
+  },
+  "author": "Compucorp <info@compucorp.co.uk>",
+  "license": "GNU Affero Public License 3.0",
+  "bugs": {
+    "url": "https://github.com/compucorp/uk.co.compucorp.civicaseexrtas/issues"
+  },
+  "homepage": "https://github.com/compucorp/uk.co.compucorp.civicaseexrtas#readme",
+  "devDependencies": {
+    "semistandard": "^12.0.1"
+  }
+}
