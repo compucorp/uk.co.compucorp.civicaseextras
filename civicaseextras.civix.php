@@ -307,15 +307,23 @@ function _civicaseextras_civix_civicrm_caseTypes(&$caseTypes) {
 }
 
 /**
- * (Delegated) Implements hook_civicrm_angularModules().
- *
- * Find any and return any files matching "ang/*.ang.php"
+ * (Delegated) Implements hook_civicrm_angularModules(). *
  *
  * Note: This hook only runs in CiviCRM 4.5+.
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules
  */
 function _civicaseextras_civix_civicrm_angularModules(&$angularModules) {
+  _civicaseextras_includeAngularModules($angularModules);
+  _civicaseextras_addCiviCaseExtrasAsRequirementForCivicase($angularModules);
+}
+
+/**
+ * Find any and return any files matching "ang/*.ang.php" and includes them as angular modules.
+ *
+ * @param Array $angularModules
+ */
+function _civicaseextras_includeAngularModules(&$angularModules) {
   if (!is_dir(__DIR__ . '/ang')) {
     return;
   }
@@ -330,6 +338,25 @@ function _civicaseextras_civix_civicrm_angularModules(&$angularModules) {
     $angularModules[$name] = $module;
   }
 }
+
+/**
+ * Add civicase extras as a requirement of civicase
+ *
+ * @param Array $angularModules
+ */
+function _civicaseextras_addCiviCaseExtrasAsRequirementForCivicase(&$angularModules) {
+  if (isset($angularModules['civicase'])) {
+    $angularModules['civicase']['requires'][] = 'civicaseextras';
+  } else {
+    CRM_Core_Session::setStatus(
+      'The <strong>Civicase Extras</strong> extension requires <strong>CiviCase</strong> to be installed first.',
+      'Warning',
+      'no-popup'
+    );
+  }
+}
+
+
 
 /**
  * Glob wrapper which is guaranteed to return an array.
