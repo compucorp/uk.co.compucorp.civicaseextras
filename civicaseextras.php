@@ -134,6 +134,16 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
   _civicaseextras_civix_civicrm_entityTypes($entityTypes);
 }
 
+function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
+  $changeSet = \Civi\Angular\ChangeSet::create('inject_case_outcomes')
+    ->alterHtml('~/civicase/CaseDetails--tabs--summary.html',
+      function (phpQueryObject $doc) {
+        $doc->find('.civicase__summary-tab-tile-container:last')
+          ->before('<civicase-extras-outcome case="item"></civicase-extras-outcome>');
+      });
+  $angular->add($changeSet);
+}
+
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
