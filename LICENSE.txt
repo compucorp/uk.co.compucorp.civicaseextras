@@ -1,5 +1,4 @@
 Package: uk.co.compucorp.civicaseextras
-Copyright (C) 2018, René Olivo <minet.ws@gmail.com>
 Licensed under the GNU Affero Public License 3.0 (below).
 
 -------------------------------------------------------------------------------
