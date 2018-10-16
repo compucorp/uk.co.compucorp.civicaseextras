@@ -14,15 +14,9 @@
     $scope.activityOutcomes = [];
 
     (function init () {
-      $q.all([
-        CiviCaseExtrasCustomFields.get(),
-        getActivityOutcomes()
-      ])
-        .then(function (results) {
-          customFieldsMap = results[0];
+      loadCaseOutcomesData();
 
-          storeActivityOutcomes(results[1].values);
-        });
+      $scope.$on('updateCaseData', loadCaseOutcomesData);
     })();
 
     /**
@@ -36,6 +30,22 @@
         'case_id': $scope.case.id,
         'activity_type_id.grouping': 'outcome'
       });
+    }
+
+    /**
+     * Loads the custom fields and activity outcomes data. The data is stored
+     * and prepared for use by the view.
+     */
+    function loadCaseOutcomesData () {
+      $q.all([
+        CiviCaseExtrasCustomFields.get(),
+        getActivityOutcomes()
+      ])
+        .then(function (results) {
+          customFieldsMap = results[0];
+
+          storeActivityOutcomes(results[1].values);
+        });
     }
 
     /**

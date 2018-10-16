@@ -21,14 +21,19 @@
       CiviCaseExtrasCustomFields = _CiviCaseExtrasCustomFields_;
       customFieldsMockData = _customFieldsMockData_.get();
       customFieldsMockFieldsMap = _customFieldsMockData_.getFieldsMap();
+      CiviCaseExtrasCustomFields.get = jasmine.createSpy('get');
+
+      CiviCaseExtrasCustomFields.get.and.returnValue(customFieldsMockFieldsMap);
+      crmApi.and.returnValue($q.resolve({
+        count: activitiesMockData.length,
+        values: activitiesMockData
+      }));
     }));
 
     describe('on init', function () {
       var expectedOutcomes = [];
 
       beforeEach(function () {
-        CiviCaseExtrasCustomFields.get = jasmine.createSpy('get');
-
         activitiesMockData.forEach(function (activity) {
           customFieldsMockData.forEach(function (customField) {
             activity['custom_' + customField.id] = _.random(0, 9999);
@@ -55,11 +60,6 @@
           };
         });
 
-        CiviCaseExtrasCustomFields.get.and.returnValue(customFieldsMockFieldsMap);
-        crmApi.and.returnValue($q.resolve({
-          count: activitiesMockData.length,
-          values: activitiesMockData
-        }));
         initController();
       });
 
@@ -73,6 +73,21 @@
 
       it('stores a list of activity outcomes and their custom fields', function () {
         expect($scope.activityOutcomes).toEqual(expectedOutcomes);
+      });
+    });
+
+    describe('when the case details have been updated', function () {
+      beforeEach(function () {
+        initController();
+        $rootScope.$emit('updateCaseData');
+      });
+
+      it('refreshes the case outcome data', function () {
+        expect(crmApi).toHaveBeenCalledWith('Activity', 'get', {
+          'sequential': 1,
+          'case_id': $scope.case.id,
+          'activity_type_id.grouping': 'outcome'
+        });
       });
     });
 
