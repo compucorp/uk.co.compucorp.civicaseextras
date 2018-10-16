@@ -2,7 +2,7 @@
 
 (function (_) {
   describe('CustomFields service', function () {
-    var $q, $rootScope, crmApi, customFieldMockData, CustomFields;
+    var $q, $rootScope, crmApi, customFieldsMockData, CustomFields;
 
     beforeEach(module('civicaseextras', function ($provide) {
       crmApi = jasmine.createSpy('crmApi');
@@ -10,28 +10,25 @@
       $provide.value('crmApi', crmApi);
     }));
 
-    beforeEach(inject(function (_$q_, _$rootScope_, CiviCaseExtrasCustomFields) {
+    beforeEach(inject(function (_$q_, _$rootScope_, CiviCaseExtrasCustomFields,
+      _customFieldsMockData_) {
       $q = _$q_;
       $rootScope = _$rootScope_;
       CustomFields = CiviCaseExtrasCustomFields;
+      customFieldsMockData = _customFieldsMockData_;
     }));
 
     describe('requesting the custom fields', function () {
       var expectedCustomFields, customFieldsResults;
 
       beforeEach(function () {
-        customFieldMockData = {
-          values: [
-            { id: _.uniqueId(), label: 'Custom Field #1' },
-            { id: _.uniqueId(), label: 'Custom Field #2' },
-            { id: _.uniqueId(), label: 'Custom Field #3' }
-          ]
-        };
-        expectedCustomFields = _.indexBy(customFieldMockData.values, function (customField) {
-          return 'custom_' + customField.id;
-        });
+        var customFields = customFieldsMockData.get();
+        expectedCustomFields = customFieldsMockData.getFieldsMap();
 
-        crmApi.and.returnValue($q.resolve(customFieldMockData));
+        crmApi.and.returnValue($q.resolve({
+          count: customFields.length,
+          values: customFields
+        }));
       });
 
       describe('when the custom fields have not been loaded', function () {

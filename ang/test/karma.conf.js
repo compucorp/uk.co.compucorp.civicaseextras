@@ -1,6 +1,7 @@
 var cv = require('civicrm-cv')({ mode: 'sync' });
 
 module.exports = function (config) {
+  var civicasePath = cv('path -x uk.co.compucorp.civicase')[0].value;
   var civicrmPath = cv("path -d '[civicrm.root]'")[0].value;
   var extPath = cv('path -x uk.co.compucorp.civicaseextras')[0].value;
 
@@ -19,6 +20,7 @@ module.exports = function (config) {
 
       'bower_components/angular/angular.min.js',
       'bower_components/angular-mocks/angular-mocks.js',
+      civicasePath + '/packages/moment.min.js',
 
       // Global variables that need to be accessible in the test environment
       extPath + '/ang/test/global.js',
@@ -26,9 +28,17 @@ module.exports = function (config) {
       // angular templates
       extPath + '/ang/civicase/*.html',
 
+      // Civicase Mock files
+      { pattern: civicasePath + '/ang/test/mocks/modules.mock.js' },
+      { pattern: civicasePath + '/ang/test/mocks/**/*.js' },
+
       // Source Files
       extPath + '/ang/civicaseextras.js',
       { pattern: extPath + '/ang/civicaseextras/**/*.js' },
+
+      // Civicase Extras Mock files
+      { pattern: extPath + '/ang/test/mocks/modules.mock.js' },
+      { pattern: extPath + '/ang/test/mocks/**/*.js' },
 
       // Spec files
       { pattern: extPath + '/ang/test/civicaseextras/**/*.js' }
