@@ -3,10 +3,29 @@
 
   module.directive('civicaseExtrasCaseOutcome', function () {
     return {
+      require: '^civicaseMasonryGrid',
       scope: { case: '=' },
+      replace: true,
       templateUrl: '~/civicaseextras/CaseOutcome.html',
-      controller: 'civicaseExtrasCaseOutcomeController'
+      controller: 'civicaseExtrasCaseOutcomeController',
+      link: civicaseExtrasCaseOutcomeLink
     };
+
+    function civicaseExtrasCaseOutcomeLink ($scope, $element, attrs, masonryGrid) {
+      (function init () {
+        $scope.$on('civicaseExtrasCaseOutcome::loaded', oncaseOutcomeLoaded);
+      })();
+
+      function oncaseOutcomeLoaded () {
+        if ($scope.activityOutcomes.length) {
+          masonryGrid.addGridItemAt($element, 0);
+          $element.show();
+        } else {
+          masonryGrid.removeGridItem($element);
+          $element.hide();
+        }
+      }
+    }
   });
 
   module.controller('civicaseExtrasCaseOutcomeController', function ($q, $scope, crmApi, CiviCaseExtrasCustomFields) {
@@ -45,6 +64,9 @@
           customFieldsMap = results[0];
 
           storeActivityOutcomes(results[1].values);
+        })
+        .finally(function () {
+          $scope.$emit('civicaseExtrasCaseOutcome::loaded');
         });
     }
 

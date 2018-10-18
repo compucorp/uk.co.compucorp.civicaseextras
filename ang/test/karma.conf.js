@@ -26,7 +26,7 @@ module.exports = function (config) {
       extPath + '/ang/test/global.js',
 
       // angular templates
-      extPath + '/ang/civicase/*.html',
+      extPath + '/ang/civicaseextras/*.html',
 
       // Civicase Mock files
       { pattern: civicasePath + '/ang/test/mocks/modules.mock.js' },
@@ -51,7 +51,7 @@ module.exports = function (config) {
       return obj;
     })({}),
     ngHtml2JsPreprocessor: {
-      stripPrefix: 'ext/civicaseextras/ang',
+      stripPrefix: 'ext/uk.co.compucorp.civicaseextras/ang',
       prependPrefix: '~',
       moduleName: 'civicaseextras.templates'
     },
