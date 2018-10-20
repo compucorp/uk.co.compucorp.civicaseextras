@@ -490,7 +490,7 @@ function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
   $changeSet = \Civi\Angular\ChangeSet::create('inject_case_outcomes')
     ->alterHtml('~/civicase/CaseDetails--tabs--summary--CustomData.html',
       function (phpQueryObject $doc) {
-        $doc->find('[civicase-masonry-grid]')
+        $doc->find('civicase-masonry-grid')
           ->prepend('<civicase-extras-case-outcome case="item"></civicase-extras-case-outcome>');
       });
   $angular->add($changeSet);

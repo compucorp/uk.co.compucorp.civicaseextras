@@ -1,21 +1,21 @@
-<div
-  class="panel panel-default civicase__panel-transparent-header"
-  civicase-masonry-grid-item>
-  <div class="panel-heading">
-    <h3 class="panel-title">Case outcome</h3>
+<civicase-masonry-grid-item ng-if="activityOutcomes.length" position="0">
+  <div class="panel panel-default civicase__panel-transparent-header">
+    <div class="panel-heading">
+      <h3 class="panel-title">Case outcome</h3>
+    </div>
+    <div class="panel-body">
+      <uib-accordion>
+        <div uib-accordion-group
+          class="civicase__accordion"
+          ng-repeat="outcome in activityOutcomes"
+          heading="{{outcome.activityType}}"
+          is-open="$first">
+          <p ng-repeat="customField in outcome.customFields">
+            <span class="description">{{customField.label}}</span><br />
+            <span>{{customField.value}}</span>
+          </p>
+        </div>
+      </uib-accordion>
+    </div>
   </div>
-  <div class="panel-body">
-    <uib-accordion>
-      <div uib-accordion-group
-        class="civicase__accordion"
-        ng-repeat="outcome in activityOutcomes"
-        heading="{{outcome.activityType}}"
-        is-open="$first">
-        <p ng-repeat="customField in outcome.customFields">
-          <span class="description">{{customField.label}}</span><br />
-          <span>{{customField.value}}</span>
-        </p>
-      </div>
-    </uib-accordion>
-  </div>
-</div>
+</civicase-masonry-grid-item>
