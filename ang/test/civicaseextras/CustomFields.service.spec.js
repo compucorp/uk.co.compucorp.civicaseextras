@@ -58,6 +58,8 @@
         beforeEach(function (done) {
           CustomFields.get()
             .then(function () {
+              crmApi.calls.reset();
+
               return CustomFields.get();
             })
             .then(function (_customFieldsResults_) {
@@ -67,8 +69,8 @@
           $rootScope.$digest();
         });
 
-        it('requests the custom fields only once', function () {
-          expect(crmApi.calls.count()).toBe(1);
+        it('it does not do any api calls', function () {
+          expect(crmApi.calls.count()).toBe(0);
         });
 
         it('returns a map of custom field labels indexed by their field name', function () {

@@ -2,7 +2,7 @@
   var module = angular.module('civicaseextras');
 
   module.service('CiviCaseExtrasCustomFields', function ($q, crmApi) {
-    var customFields = {};
+    var customFields;
 
     this.get = get;
 
@@ -13,11 +13,15 @@
      * @return {Promise} resolves to an object.
      */
     function get () {
-      if (!_.isEmpty(customFields)) {
-        return $q.resolve(customFields);
-      } else {
-        return loadCustomFields();
-      }
+      return customFields
+        ? $q.resolve(customFields)
+        : loadCustomFields()
+          .then(getIndexedCustomFields)
+          .then(function (_customFields_) {
+            customFields = _customFields_;
+
+            return customFields;
+          });
     }
 
     /**
@@ -47,9 +51,7 @@
         'return': [ 'label' ]
       })
         .then(function (result) {
-          customFields = getIndexedCustomFields(result.values);
-
-          return customFields;
+          return result.values;
         });
     }
   });

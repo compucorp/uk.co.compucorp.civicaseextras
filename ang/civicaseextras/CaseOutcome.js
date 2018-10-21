@@ -3,7 +3,6 @@
 
   module.directive('civicaseExtrasCaseOutcome', function () {
     return {
-      require: '^civicaseMasonryGrid',
       scope: { case: '=' },
       templateUrl: '~/civicaseextras/CaseOutcome.html',
       controller: 'civicaseExtrasCaseOutcomeController'
