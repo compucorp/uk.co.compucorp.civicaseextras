@@ -486,6 +486,11 @@ function _civicaseextras_civix_civicrm_entityTypes(&$entityTypes) {
   ));
 }
 
+/**
+ * Adds the case duration column and value to the case list table template of civicase.
+ *
+ * @param Manager $angular as provided by the alter angular hook.
+ */
 function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
   $changeSet = \Civi\Angular\ChangeSet::create('inject_case_outcomes')
     ->alterHtml('~/civicase/CaseDetails--tabs--summary--CustomData.html',
@@ -494,4 +499,18 @@ function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
           ->prepend('<civicase-extras-case-outcome case="item"></civicase-extras-case-outcome>');
       });
   $angular->add($changeSet);
+}
+
+/**
+ * Returns the details for the case duration custom fields.
+ *
+ * @return array
+ */
+function _civicaseextras_get_caseDurationField () {
+  $caseDuration = civicrm_api3('CustomField', 'get', [
+    'custom_group_id' => 'Case_Stats',
+    'name' => 'duration'
+  ]);
+
+  return CRM_Utils_Array::first($caseDuration['values'], []);
 }
