@@ -134,6 +134,10 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
   _civicaseextras_civix_civicrm_entityTypes($entityTypes);
 }
 
+function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
+  _civicaseextras_civicrm_alterAngular($angular);
+}
+
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**

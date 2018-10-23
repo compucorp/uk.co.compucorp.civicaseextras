@@ -14,6 +14,8 @@ return [
     'ang/civicaseextras',
   ],
   'settings' => [],
-  'requires' => [],
+  'requires' => [
+    'crmUtil'
+  ],
   'basePages' => [],
 ];
