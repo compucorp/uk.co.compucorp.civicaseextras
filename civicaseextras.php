@@ -142,6 +142,13 @@ function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
 }
 
 /**
+ * Implements hook_civicrm_alterAngular().
+ */
+function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
+  _civicaseextras_civicrm_alterAngular($angular);
+}
+
+/**
  * Implements hook_civicrm_apiWrappers().
  */
 function civicaseextras_civicrm_apiWrappers(&$wrappers, $apiRequest) {

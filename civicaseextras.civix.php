@@ -502,6 +502,58 @@ function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
 }
 
 /**
+ * (Delegated) Implements hook_civicrm_alterAngular().
+ */
+function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
+  _civicaseextras_civicrm_alterAngular__addCaseDurationToCaseList($angular);
+}
+
+/**
+ * Adds the case duration column and value to the case list table template of civicase.
+ *
+ * @param Manager $angular as provided by the alter angular hook.
+ */
+function _civicaseextras_civicrm_alterAngular__addCaseDurationToCaseList (\Civi\Angular\Manager &$angular) {
+  $changeSet = \Civi\Angular\ChangeSet::create('inject_case_duration')
+    ->alterHtml('~/civicase/CaseListTable.html',
+      function (phpQueryObject $doc) {
+        $caseDuration = _civicaseextras_get_caseDurationField();
+
+        _civicaseextras_civicrm_alterAngular__addCaseDurationTableHeader($doc, $caseDuration);
+        _civicaseextras_civicrm_alterAngular__addCaseDurationTableCell($doc, $caseDuration);
+      });
+  $angular->add($changeSet);
+}
+
+/**
+ * Adds the case duration table header to the civicase list table.
+ *
+ * @param phpQueryObject $doc
+ * @param array $caseDuration
+ */
+function _civicaseextras_civicrm_alterAngular__addCaseDurationTableHeader(&$doc, $caseDuration) {
+  $doc->find('.civicase__case-list-table thead tr')
+    ->append('<th
+      ng-show="!viewingCase && headers.length"
+      civicase-case-list-sort-header="custom_' . $caseDuration['id'] . '">
+      ' . $caseDuration['label'] . '
+    </th>');
+}
+
+/**
+ * Adds the case duration table cell to the civicase list table.
+ *
+ * @param phpQueryObject $doc
+ * @param array $caseDuration
+ */
+function _civicaseextras_civicrm_alterAngular__addCaseDurationTableCell(&$doc, $caseDuration) {
+  $doc->find('.civicase__case-list-table tbody tr[ng-repeat="item in cases"]')
+    ->append('<td ng-show="!viewingCase && headers.length">
+      {{item.custom_' . $caseDuration['id'] . '}}
+    </td>');
+}
+
+/**
  * Returns the details for the case duration custom fields.
  *
  * @return array
