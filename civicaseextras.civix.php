@@ -487,11 +487,19 @@ function _civicaseextras_civix_civicrm_entityTypes(&$entityTypes) {
 }
 
 /**
- * Adds the case duration column and value to the case list table template of civicase.
+ * (Delegated) Implements hook_civicrm_alterAngular().
+ */
+function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
+  _civicaseextras_civicrm_alterAngular__addCaseOutcomesPanel($angular);
+  _civicaseextras_civicrm_alterAngular__addCaseDurationToCaseList($angular);
+}
+
+/**
+ * Adds a case outcomes panel to the case details.
  *
  * @param Manager $angular as provided by the alter angular hook.
  */
-function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
+function _civicaseextras_civicrm_alterAngular__addCaseOutcomesPanel(\Civi\Angular\Manager &$angular) {
   $changeSet = \Civi\Angular\ChangeSet::create('inject_case_outcomes')
     ->alterHtml('~/civicase/CaseDetails--tabs--summary--CustomData.html',
       function (phpQueryObject $doc) {
@@ -499,13 +507,6 @@ function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
           ->prepend('<civicase-extras-case-outcome case="item"></civicase-extras-case-outcome>');
       });
   $angular->add($changeSet);
-}
-
-/**
- * (Delegated) Implements hook_civicrm_alterAngular().
- */
-function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
-  _civicaseextras_civicrm_alterAngular__addCaseDurationToCaseList($angular);
 }
 
 /**
