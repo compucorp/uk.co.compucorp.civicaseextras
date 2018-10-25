@@ -113,6 +113,7 @@ function civicaseextras_civicrm_caseTypes(&$caseTypes) {
  */
 function civicaseextras_civicrm_angularModules(&$angularModules) {
   _civicaseextras_civix_civicrm_angularModules($angularModules);
+  _civicaseextras_addCiviCaseExtrasAsRequirementForCivicase($angularModules);
 }
 
 /**
@@ -139,7 +140,14 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
  * Implements hook_civicrm_alterAngular().
  */
 function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
-  _civicaseextras_civicrm_alterAngular($angular);
+  $modifiers = [
+    new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular),
+    new CRM_Civicaseextras_AngularModifiers_OutcomesPanel($angular),
+  ];
+
+  foreach ($modifiers as $modifier) {
+    $modifier->runModifications();
+  }
 }
 
 /**
@@ -148,6 +156,38 @@ function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
 function civicaseextras_civicrm_apiWrappers(&$wrappers, $apiRequest) {
   $wrappers[] = new CRM_Civicaseextras_APIWrappers_Case_Getcaselist();
 }
+
+/**
+ * Add civicase extras as a requirement of civicase
+ *
+ * @param Array $angularModules
+ */
+function _civicaseextras_addCiviCaseExtrasAsRequirementForCivicase(&$angularModules) {
+  if (isset($angularModules['civicase'])) {
+    $angularModules['civicase']['requires'][] = 'civicaseextras';
+  } else {
+    CRM_Core_Session::setStatus(
+      'The <strong>Civicase Extras</strong> extension requires <strong>CiviCase</strong> to be installed first.',
+      'Warning',
+      'no-popup'
+    );
+  }
+}
+
+/**
+ * Returns the details for the case duration custom fields.
+ *
+ * @return array
+ */
+function _civicaseextras_get_caseDurationField () {
+  $caseDuration = civicrm_api3('CustomField', 'get', [
+    'custom_group_id' => 'Case_Stats',
+    'name' => 'duration'
+  ]);
+
+  return CRM_Utils_Array::first($caseDuration['values'], []);
+}
+
 
 // --- Functions below this ship commented out. Uncomment as required. ---
 
