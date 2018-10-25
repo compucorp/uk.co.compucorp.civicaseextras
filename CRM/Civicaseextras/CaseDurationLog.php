@@ -1,5 +1,8 @@
 <?php
 
+use CRM_Dictionaries_ActivityStatus as ActivityStatus;
+use CRM_Dictionaries_ActivityTypes as ActivityTypes;
+
 /**
  * Handles the case duration log used to calculate total case durations.
  */
@@ -83,12 +86,12 @@ class CRM_CiviCaseextras_CaseDurationLog {
    */
   public function preProcessCaseActivity(&$params) {
     $activityType = CRM_Utils_Array::value($params['activity_type_id'], $this->activityTypes);
-
-    if ($activityType === CRM_Dictionaries_ActivityTypes::CHANGE_CASE_STATUS &&
-      !empty($params['activity_date_time']) &&
+    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+    $hasParamsDefined = !empty($params['activity_date_time']) &&
       !empty($params['case_status_id']) &&
-      !empty($params['case_id'])
-    ) {
+      !empty($params['case_id']);
+
+    if ($isCaseChangingStatus && $hasParamsDefined) {
       $this->pendingCases[$params['case_id']] = $params;
     }
   }
@@ -118,21 +121,17 @@ class CRM_CiviCaseextras_CaseDurationLog {
    * @return bool
    */
   private function isCaseOpening($activityDAO) {
-    $openCase = FALSE;
     $activityType = CRM_Utils_Array::value($activityDAO->activity_type_id, $this->activityTypes);
+    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS
+    $isCaseOpening = $activityType === ActivityTypes::OPEN_CASE;
+    $isCasePending = isset($this->pendingCases[$activityDAO->case_id]);
 
-    if ($activityType === CRM_Dictionaries_ActivityTypes::OPEN_CASE) {
-      $openCase = TRUE;
-    }
-    elseif ($activityType === CRM_Dictionaries_ActivityTypes::CHANGE_CASE_STATUS && isset($this->pendingCases[$activityDAO->case_id])) {
+    if (!$isCaseOpening && $isCaseChangingStatus && $isCasePending) {
       $caseStatusID = $this->pendingCases[$activityDAO->case_id]['case_status_id'];
-
-      if ($this->statuses[$caseStatusID]['grouping'] === CRM_Dictionaries_ActivityStatus::OPENED) {
-        $openCase = TRUE;
-      }
+      $isCaseOpening = $activityType === $this->statuses[$caseStatusID]['grouping'] === ActivityStatus::OPENED;
     }
 
-    if ($openCase) {
+    if ($isCaseOpening) {
       $query = "
         SELECT *
         FROM civicrm_case_duration_log
@@ -160,16 +159,15 @@ class CRM_CiviCaseextras_CaseDurationLog {
    */
   private function isCaseClosing($activityDAO) {
     $activityType = CRM_Utils_Array::value($activityDAO->activity_type_id, $this->activityTypes);
+    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+    $isCaseClosing = FALSE;
 
-    if ($activityType === CRM_Dictionaries_ActivityTypes::CHANGE_CASE_STATUS) {
+    if ($isCaseChangingStatus) {
       $caseStatusID = $this->pendingCases[$activityDAO->case_id]['case_status_id'];
-
-      if ($this->statuses[$caseStatusID]['grouping'] === CRM_Dictionaries_ActivityStatus::CLOSED) {
-        return TRUE;
-      }
+      $isCaseClosing = $this->statuses[$caseStatusID]['grouping'] === ActivityStatus::CLOSED;
     }
 
-    return FALSE;
+    return $isCaseClosing;
   }
 
   /**
@@ -181,7 +179,8 @@ class CRM_CiviCaseextras_CaseDurationLog {
   public function processOldCaseActivity($activityDAO) {
     if ($this->wasCaseOpening($activityDAO)) {
       $this->startLog($activityDAO->id, $activityDAO->activity_date_time, $activityDAO->case_id);
-    } elseif ($this->wasCaseClosing($activityDAO)) {
+    }
+    elseif ($this->wasCaseClosing($activityDAO)) {
       $this->endLog($activityDAO->id, $activityDAO->activity_date_time, $activityDAO->case_id);
     }
   }
@@ -240,16 +239,14 @@ class CRM_CiviCaseextras_CaseDurationLog {
    *   True if the current activity is opening the case, false otherwise
    */
   private function wasCaseOpening($caseActivity) {
-    $changeStatusToOpen = FALSE;
     $activityType = CRM_Utils_Array::value($caseActivity->activity_type_id, $this->activityTypes);
+    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+    $isCaseStatusOpened = $this->extractStatusFromSubject($caseActivity->subject) === ActivityStatus::OPENED;
+    $isActivityOpeningTheCase = $activityType === ActivityTypes::OPEN_CASE;
 
-    if ($activityType === CRM_Dictionaries_ActivityTypes::CHANGE_CASE_STATUS) {
-      if ($this->extractStatusFromSubject($caseActivity->subject) === CRM_Dictionaries_ActivityStatus::OPENED) {
-        $changeStatusToOpen = TRUE;
-      }
-    }
+    $changeStatusToOpen = $isCaseChangingStatus && $isCaseStatusOpened;
 
-    if ($activityType === CRM_Dictionaries_ActivityTypes::OPEN_CASE || $changeStatusToOpen) {
+    if ($isActivityOpeningTheCase || $changeStatusToOpen) {
       $query = "
         SELECT *
         FROM civicrm_case_duration_log
@@ -279,14 +276,10 @@ class CRM_CiviCaseextras_CaseDurationLog {
    */
   private function wasCaseClosing($caseActivity) {
     $activityType = CRM_Utils_Array::value($caseActivity->activity_type_id, $this->activityTypes);
+    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+    $isActivityClosingTheCase = $this->extractStatusFromSubject($caseActivity->subject) === ActivityStatus::CLOSED;
 
-    if ($activityType === CRM_Dictionaries_ActivityTypes::CHANGE_CASE_STATUS) {
-      if ($this->extractStatusFromSubject($caseActivity->subject) === CRM_Dictionaries_ActivityStatus::CLOSED) {
-        return TRUE;
-      }
-    }
-
-    return FALSE;
+    return $isCaseChangingStatus && $isActivityClosingTheCase;
   }
 
   /**
