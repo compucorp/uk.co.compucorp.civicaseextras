@@ -162,12 +162,13 @@ function civicaseextras_civicrm_apiWrappers(&$wrappers, $apiRequest) {
 /**
  * Add civicase extras as a requirement of civicase
  *
- * @param Array $angularModules
+ * @param array $angularModules
  */
 function _civicaseextras_addCiviCaseExtrasAsRequirementForCivicase(&$angularModules) {
   if (isset($angularModules['civicase'])) {
     $angularModules['civicase']['requires'][] = 'civicaseextras';
-  } else {
+  }
+  else {
     CRM_Core_Session::setStatus(
       'The <strong>Civicase Extras</strong> extension requires <strong>CiviCase</strong> to be installed first.',
       'Warning',
