@@ -2,6 +2,7 @@
 
 require_once 'civicaseextras.civix.php';
 use CRM_Civicaseextras_ExtensionUtil as E;
+use \Civi\Angular\Manager as AngularManager;
 
 /**
  * Implements hook_civicrm_config().
@@ -137,7 +138,7 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
 /**
  * Implements hook_civicrm_alterAngular().
  */
-function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
+function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
   _civicaseextras_civicrm_alterAngular($angular);
 }
 
@@ -145,9 +146,7 @@ function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
  * Implements hook_civicrm_apiWrappers().
  */
 function civicaseextras_civicrm_apiWrappers(&$wrappers, $apiRequest) {
-  if ($apiRequest['entity'] == 'Case' && $apiRequest['action'] == 'getcaselist') {
-    $wrappers[] = new CRM_Civicaseextras_APIWrappers_Case_Getcaselist();
-  }
+  $wrappers[] = new CRM_Civicaseextras_APIWrappers_Case_Getcaselist();
 }
 
 // --- Functions below this ship commented out. Uncomment as required. ---

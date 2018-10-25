@@ -2,14 +2,14 @@
 
 class CRM_Civicaseextras_APIWrappers_Case_Getcaselist implements API_Wrapper {
     /**
-     * Implements API_Wrapper::fromApiInput().
-     *
-     * Alters the Case Getcaselist action so it includes the case duration custom field to the response.
-     *
-     * @param array $apiRequest
-     * @return array
+     * {@inheritDoc} It Alters the Case Getcaselist action so it includes the case duration
+     * custom field to the response.
      */
     public function fromApiInput($apiRequest) {
+      if (!$this->shouldRun($apiRequest)) {
+        return $apiRequest;
+      }
+
       $return = CRM_Utils_Array::value('return', $apiRequest['params'], []);
       $caseDuration = _civicaseextras_get_caseDurationField();
 
@@ -23,13 +23,20 @@ class CRM_Civicaseextras_APIWrappers_Case_Getcaselist implements API_Wrapper {
     }
 
     /**
-     * Implements API_Wrapper::toApiOutput().
-     *
-     * @param array $apiRequest
-     * @param array $result
-     * @return array
+     * {@inheritDoc}
      */
     public function toApiOutput($apiRequest, $result) {
       return $result;
+    }
+
+    /**
+     * Determines if the API Wrapper should run by checking that the request is for
+     * the Case entity and the action is "getcaselist".
+     *
+     * @param array $apiRequest
+     * @return bool
+     */
+    public function shouldRun($apiRequest) {
+      return $apiRequest['entity'] === 'Case' && $apiRequest['action'] === 'getcaselist';
     }
   }
