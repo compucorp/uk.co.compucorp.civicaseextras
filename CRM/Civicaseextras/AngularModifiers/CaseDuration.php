@@ -13,18 +13,18 @@ class CRM_Civicaseextras_AngularModifiers_CaseDuration {
   protected $angular;
 
   /**
-   * @var array
-   *   The case duration custom field information.
+   * @var CustomValueService
+   *   an instance of the custom value service.
    */
-  protected $caseDuration;
+  protected $customValueService;
 
   /**
-   * @param AngularManager $angular as provided by the alter angular hook.
-   * @param CustomValueService $customValueService an instance of the custom value service.
+   * @param AngularManager $angular
+   * @param CustomValueService $customValueService
    */
   public function __construct(AngularManager &$angular, CustomValueService $customValueService) {
     $this->angular = $angular;
-    $this->caseDuration = $customValueService->getCustomField('case_stats', 'duration');
+    $this->customValueService = $customValueService;
   }
 
   /**
@@ -34,8 +34,10 @@ class CRM_Civicaseextras_AngularModifiers_CaseDuration {
     $changeSet = AngularChangeSet::create('inject_case_duration')
       ->alterHtml('~/civicase/CaseListTable.html',
         function (phpQueryObject $doc) {
-          $this->addCaseDurationTableHeader($doc);
-          $this->addCaseDurationTableCell($doc);
+          $caseDuration = $this->customValueService->getCustomField('case_stats', 'duration');
+
+          $this->addCaseDurationTableHeader($doc, $caseDuration);
+          $this->addCaseDurationTableCell($doc, $caseDuration);
         });
 
     $this->angular->add($changeSet);
@@ -45,13 +47,14 @@ class CRM_Civicaseextras_AngularModifiers_CaseDuration {
    * Adds the case duration table header to the civicase list table.
    *
    * @param phpQueryObject $doc
+   * @param array $caseDuration
    */
-  protected function addCaseDurationTableHeader(phpQueryObject &$doc) {
+  protected function addCaseDurationTableHeader(phpQueryObject &$doc, $caseDuration) {
     $doc->find('.civicase__case-list-table thead tr')
       ->append('<th
         ng-show="!viewingCase && headers.length"
-        civicase-case-list-sort-header="custom_' . $this->caseDuration['id'] . '">
-        ' . $this->caseDuration['label'] . '
+        civicase-case-list-sort-header="custom_' . $caseDuration['id'] . '">
+        ' . $caseDuration['label'] . '
       </th>');
   }
 
@@ -59,11 +62,12 @@ class CRM_Civicaseextras_AngularModifiers_CaseDuration {
    * Adds the case duration table cell to the civicase list table.
    *
    * @param phpQueryObject $doc
+   * @param array $caseDuration
    */
-  protected function addCaseDurationTableCell(phpQueryObject &$doc) {
+  protected function addCaseDurationTableCell(phpQueryObject &$doc, $caseDuration) {
     $doc->find('.civicase__case-list-table tbody tr[ng-repeat="item in cases"]')
       ->append('<td ng-show="!viewingCase && headers.length">
-        {{item.custom_' . $this->caseDuration['id'] . '}}
+        {{item.custom_' . $caseDuration['id'] . '}}
       </td>');
   }
 

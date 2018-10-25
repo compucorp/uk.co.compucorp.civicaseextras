@@ -1,7 +1,7 @@
 <?php
 
-use \Civi\Angular\Manager as AngularManager;
-use \Civi\Angular\ChangeSet as AngularChangeSet;
+use Civi\Angular\Manager as AngularManager;
+use Civi\Angular\ChangeSet as AngularChangeSet;
 
 class CRM_Civicaseextras_AngularModifiers_OutcomesPanel {
 
