@@ -4,22 +4,31 @@ use \Civi\Angular\Manager as AngularManager;
 use \Civi\Angular\ChangeSet as AngularChangeSet;
 
 class CRM_Civicaseextras_AngularModifiers_CaseDuration {
+
+  /**
+   * @var AngularManager
+   *   A reference to the Angular Manager object as provided by the alter angular hook.
+   */
   protected $angular;
+
+  /**
+   * @var array
+   *   The case duration custom field information.
+   */
   protected $caseDuration;
 
   /**
    * @param AngularManager $angular as provided by the alter angular hook.
    */
-  public function __construct(AngularManager &$angular) {
+  public function __construct(AngularManager &$angular, $caseDurationCustomField) {
     $this->angular = $angular;
+    $this->caseDuration = $caseDurationCustomField;
   }
 
   /**
    * Adds the case duration column and value to the case list table template of civicase.
    */
   public function runModifications() {
-    $this->caseDuration = _civicaseextras_get_caseDurationField();
-
     $changeSet = AngularChangeSet::create('inject_case_duration')
       ->alterHtml('~/civicase/CaseListTable.html',
         function (phpQueryObject $doc) {

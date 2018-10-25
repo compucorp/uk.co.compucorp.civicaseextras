@@ -140,8 +140,10 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
  * Implements hook_civicrm_alterAngular().
  */
 function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
+  $caseDurationCustomField = CRM_Civicaseextras_Services_CustomValueService::getCustomField('case_stats', 'duration');
+
   $modifiers = [
-    new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular),
+    new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular, $caseDurationCustomField),
     new CRM_Civicaseextras_AngularModifiers_OutcomesPanel($angular),
   ];
 
@@ -173,21 +175,6 @@ function _civicaseextras_addCiviCaseExtrasAsRequirementForCivicase(&$angularModu
     );
   }
 }
-
-/**
- * Returns the details for the case duration custom fields.
- *
- * @return array
- */
-function _civicaseextras_get_caseDurationField () {
-  $caseDuration = civicrm_api3('CustomField', 'get', [
-    'custom_group_id' => 'Case_Stats',
-    'name' => 'duration'
-  ]);
-
-  return CRM_Utils_Array::first($caseDuration['values'], []);
-}
-
 
 // --- Functions below this ship commented out. Uncomment as required. ---
 

@@ -4,8 +4,12 @@ use \Civi\Angular\Manager as AngularManager;
 use \Civi\Angular\ChangeSet as AngularChangeSet;
 
 class CRM_Civicaseextras_AngularModifiers_OutcomesPanel {
+
+  /**
+   * @var AngularManager
+   *   A reference to the Angular Manager object as provided by the alter angular hook.
+   */
   protected $angular;
-  protected $caseDuration;
 
   /**
    * @param AngularManager $angular as provided by the alter angular hook.
@@ -15,7 +19,7 @@ class CRM_Civicaseextras_AngularModifiers_OutcomesPanel {
   }
 
   /**
-   * Adds the case duration column and value to the case list table template of civicase.
+   * Adds the case outcomes panel to the case details template of civicase.
    */
   public function runModifications() {
     $changeSet = AngularChangeSet::create('inject_case_outcomes')
