@@ -490,25 +490,14 @@ function _civicaseextras_civix_civicrm_entityTypes(&$entityTypes) {
  * (Delegated) Implements hook_civicrm_alterAngular().
  */
 function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
-  _civicaseextras_civicrm_alterAngular__addCaseOutcomesPanel($angular);
+  $modifiers = [
+    new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular),
+    new CRM_Civicaseextras_AngularModifiers_OutcomesPanel($angular),
+  ];
 
-  $caseDuration = new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular);
-  $caseDuration->runModifications();
-}
-
-/**
- * Adds a case outcomes panel to the case details.
- *
- * @param Manager $angular as provided by the alter angular hook.
- */
-function _civicaseextras_civicrm_alterAngular__addCaseOutcomesPanel(\Civi\Angular\Manager &$angular) {
-  $changeSet = \Civi\Angular\ChangeSet::create('inject_case_outcomes')
-    ->alterHtml('~/civicase/CaseDetails--tabs--summary--CustomData.html',
-      function (phpQueryObject $doc) {
-        $doc->find('civicase-masonry-grid')
-          ->prepend('<civicase-extras-case-outcome case="item"></civicase-extras-case-outcome>');
-      });
-  $angular->add($changeSet);
+  foreach ($modifiers as $modifier) {
+    $modifier->runModifications();
+  }
 }
 
 /**
