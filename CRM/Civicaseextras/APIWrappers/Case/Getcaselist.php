@@ -12,7 +12,7 @@ class CRM_Civicaseextras_APIWrappers_Case_Getcaselist implements API_Wrapper {
     }
 
     $return = CRM_Utils_Array::value('return', $apiRequest['params'], []);
-    $caseDuration = _civicaseextras_get_caseDurationField();
+    $caseDuration = CRM_Civicaseextras_Services_CustomValueService::getCustomField('case_stats', 'duration');
 
     if ($caseDuration) {
       $return[] = 'custom_' . $caseDuration['id'];
