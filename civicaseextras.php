@@ -143,7 +143,7 @@ function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
  */
 function civicaseextras_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName === 'Activity' && $op == 'create') {
-    $logger = CRM_Civicase_CaseDurationLog::singleton();
+    $logger = new CRM_CiviCaseextras_CaseDurationLog();
     $logger->preProcessCaseActivity($params);
   }
 }
@@ -153,7 +153,7 @@ function civicaseextras_civicrm_pre($op, $objectName, $id, &$params) {
  */
 function civicaseextras_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName === 'Activity' && $op === 'create' && !empty($objectRef->case_id)) {
-    $logger = CRM_Civicase_CaseDurationLog::singleton();
+    $logger = new CRM_CiviCaseextras_CaseDurationLog();
     $logger->postProcessCaseActivity($objectRef);
   }
 }
