@@ -2,6 +2,7 @@
 
 use Civi\Angular\Manager as AngularManager;
 use Civi\Angular\ChangeSet as AngularChangeSet;
+use CRM_Civicaseextras_Services_CustomValueService as CustomValueService;
 
 class CRM_Civicaseextras_AngularModifiers_CaseDuration {
 
@@ -19,10 +20,11 @@ class CRM_Civicaseextras_AngularModifiers_CaseDuration {
 
   /**
    * @param AngularManager $angular as provided by the alter angular hook.
+   * @param CustomValueService $customValueService an instance of the custom value service.
    */
-  public function __construct(AngularManager &$angular, $caseDurationCustomField) {
+  public function __construct(AngularManager &$angular, CustomValueService $customValueService) {
     $this->angular = $angular;
-    $this->caseDuration = $caseDurationCustomField;
+    $this->caseDuration = $customValueService->getCustomField('case_stats', 'duration');
   }
 
   /**
@@ -64,4 +66,5 @@ class CRM_Civicaseextras_AngularModifiers_CaseDuration {
         {{item.custom_' . $this->caseDuration['id'] . '}}
       </td>');
   }
+
 }

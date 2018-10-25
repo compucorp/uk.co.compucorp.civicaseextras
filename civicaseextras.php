@@ -1,8 +1,9 @@
 <?php
 
 require_once 'civicaseextras.civix.php';
+use Civi\Angular\Manager as AngularManager;
 use CRM_Civicaseextras_ExtensionUtil as E;
-use \Civi\Angular\Manager as AngularManager;
+use CRM_Civicaseextras_Services_CustomValueService as CustomValueService;
 
 /**
  * Implements hook_civicrm_config().
@@ -140,10 +141,10 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
  * Implements hook_civicrm_alterAngular().
  */
 function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
-  $caseDurationCustomField = CRM_Civicaseextras_Services_CustomValueService::getCustomField('case_stats', 'duration');
+  $customValueService = new CustomValueService();
 
   $modifiers = [
-    new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular, $caseDurationCustomField),
+    new CRM_Civicaseextras_AngularModifiers_CaseDuration($angular, $customValueService),
     new CRM_Civicaseextras_AngularModifiers_OutcomesPanel($angular),
   ];
 
@@ -156,7 +157,9 @@ function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
  * Implements hook_civicrm_apiWrappers().
  */
 function civicaseextras_civicrm_apiWrappers(&$wrappers, $apiRequest) {
-  $wrappers[] = new CRM_Civicaseextras_APIWrappers_Case_Getcaselist();
+  $customValueService = new CustomValueService();
+
+  $wrappers[] = new CRM_Civicaseextras_APIWrappers_Case_Getcaselist($customValueService);
 }
 
 /**

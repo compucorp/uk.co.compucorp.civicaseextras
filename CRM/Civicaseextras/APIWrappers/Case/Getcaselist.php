@@ -1,6 +1,21 @@
 <?php
 
+use CRM_Civicaseextras_Services_CustomValueService as CustomValueService;
+
 class CRM_Civicaseextras_APIWrappers_Case_Getcaselist implements API_Wrapper {
+
+  /**
+   * @var array
+   *   An instance of the custom value service.
+   */
+  protected $customValueService;
+
+  /**
+   * @param CustomValueService $customValueService
+   */
+  public function __construct(CustomValueService $customValueService) {
+    $this->customValueService = $customValueService;
+  }
 
   /**
    * {@inheritDoc} It Alters the Case Getcaselist action so it includes the case duration
@@ -12,7 +27,7 @@ class CRM_Civicaseextras_APIWrappers_Case_Getcaselist implements API_Wrapper {
     }
 
     $return = CRM_Utils_Array::value('return', $apiRequest['params'], []);
-    $caseDuration = CRM_Civicaseextras_Services_CustomValueService::getCustomField('case_stats', 'duration');
+    $caseDuration = $this->customValueService->getCustomField('case_stats', 'duration');
 
     if ($caseDuration) {
       $return[] = 'custom_' . $caseDuration['id'];
