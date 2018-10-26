@@ -1,6 +1,6 @@
 <?php
 
-use CRM_CiviCaseextras_Services_ActivityTypesService as ActivityTypesService;
+use CRM_CiviCaseextras_CaseDurationLog as CaseDurationLog;
 
 /**
  * Collection of upgrade steps.
@@ -461,7 +461,6 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
    * history.
    */
   private function buildDurationLog() {
-    $activityTypesService = new ActivityTypesService();
 
     CRM_Core_DAO::executeQuery('TRUNCATE TABLE civicrm_case_duration_log');
 
@@ -480,7 +479,7 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
     ";
     $caseActivitiesResult = CRM_Core_DAO::executeQuery($query);
 
-    $logger = new CRM_CiviCaseextras_CaseDurationLog($activityTypesService);
+    $logger = CaseDurationLog::fabricate();
 
     while ($caseActivitiesResult->fetch()) {
       $logger->processOldCaseActivity($caseActivitiesResult);

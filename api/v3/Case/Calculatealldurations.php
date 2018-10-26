@@ -1,14 +1,12 @@
 <?php
 
-use CRM_CiviCaseextras_Services_ActivityTypesService as ActivityTypesService;
+use CRM_CiviCaseextras_CaseDurationLog as CaseDurationLog;
 
 /**
  * API call to calculate the duration of all cases.
  */
 function civicrm_api3_case_calculatealldurations() {
-  $activityTypesService = new ActivityTypesService();
-
-  $logger = new CRM_CiviCaseextras_CaseDurationLog($activityTypesService);
+  $logger = CaseDurationLog::fabricate();
   $logger->calculateAllCasesDuration();
 
   return array();

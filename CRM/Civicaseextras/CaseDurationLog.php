@@ -1,25 +1,14 @@
 <?php
 
-use CRM_Dictionaries_ActivityStatus as ActivityStatus;
 use CRM_Dictionaries_ActivityTypes as ActivityTypes;
+use CRM_Dictionaries_CaseStatus as CaseStatus;
 use CRM_CiviCaseextras_Services_ActivityTypesService as ActivityTypesService;
+use CRM_CiviCaseextras_Services_CaseStatusService as CaseStatusService;
 
 /**
  * Handles the case duration log used to calculate total case durations.
  */
 class CRM_CiviCaseextras_CaseDurationLog {
-
-  /**
-   * @var array
-   */
-  private $statuses = array();
-
-  /**
-   * Array mapping available case statuses to either Opened or Closed groupings.
-   *
-   * @var array
-   */
-  private $statusGroupingsPerLabel = array();
 
   /**
    * Array of cases that have been preprocessed, to be resolved once activity is
@@ -36,19 +25,30 @@ class CRM_CiviCaseextras_CaseDurationLog {
   protected $activityTypesService;
 
   /**
+   * @var CaseStatusService
+   *   A reference to the Case Status Service
+   */
+  protected $caseStatusService;
+
+  /**
+   * Returns a new instance of the case duration class and provides all of its
+   * dependencies.
+   *
+   * @return CRM_CiviCaseextras_CaseDurationLog
+   */
+  public static function fabricate() {
+    $caseStatusService = new CaseStatusService();
+    $activityTypesService = new ActivityTypesService();
+
+    return new CRM_CiviCaseextras_CaseDurationLog($caseStatusService, $activityTypesService);
+  }
+
+  /**
+   * @param $caseStatusService
    * @param $activityTypesService
    */
-  public function __construct(ActivityTypesService $activityTypesService) {
-    $statuses = civicrm_api3('OptionValue', 'get', array(
-      'sequential' => 1,
-      'option_group_id' => 'case_status',
-    ));
-
-    foreach ($statuses['values'] as $status) {
-      $this->statuses[$status['value']] = $status;
-      $this->statusGroupingsPerLabel[$status['label']] = $status['grouping'];
-    }
-
+  public function __construct(CaseStatusService $caseStatusService, ActivityTypesService $activityTypesService) {
+    $this->caseStatusService = $caseStatusService;
     $this->activityTypesService = $activityTypesService;
   }
 
@@ -105,8 +105,8 @@ class CRM_CiviCaseextras_CaseDurationLog {
     $isCasePending = isset($this->pendingCases[$activityDAO->case_id]);
 
     if (!$isCaseOpening && $isCaseChangingStatus && $isCasePending) {
-      $caseStatusID = $this->pendingCases[$activityDAO->case_id]['case_status_id'];
-      $isCaseOpening = $this->statuses[$caseStatusID]['grouping'] === ActivityStatus::OPENED;
+      $pendingCase = $this->pendingCases[$activityDAO->case_id];
+      $isCaseOpening = $this->caseStatusService->confirmCaseStatus($pendingCase, CaseStatus::OPENED);
     }
 
     if ($isCaseOpening) {
@@ -141,8 +141,8 @@ class CRM_CiviCaseextras_CaseDurationLog {
     $isCaseClosing = FALSE;
 
     if ($isCaseChangingStatus) {
-      $caseStatusID = $this->pendingCases[$activityDAO->case_id]['case_status_id'];
-      $isCaseClosing = $this->statuses[$caseStatusID]['grouping'] === ActivityStatus::CLOSED;
+      $pendingCase = $this->pendingCases[$activityDAO->case_id];
+      $isCaseClosing = $this->caseStatusService->confirmCaseStatus($pendingCase, CaseStatus::CLOSED);
     }
 
     return $isCaseClosing;
@@ -221,7 +221,7 @@ class CRM_CiviCaseextras_CaseDurationLog {
       ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
     $isActivityOpeningTheCase  = $this->activityTypesService
       ->isActivityOfGivenType($activity, ActivityTypes::OPEN_CASE);
-    $isCaseStatusOpened = $this->extractStatusFromSubject($caseActivity->subject) === ActivityStatus::OPENED;
+    $isCaseStatusOpened = $this->extractStatusFromSubject($caseActivity->subject) === CaseStatus::OPENED;
 
     $changeStatusToOpen = $isCaseChangingStatus && $isCaseStatusOpened;
 
@@ -256,7 +256,7 @@ class CRM_CiviCaseextras_CaseDurationLog {
   private function wasCaseClosing($activity) {
     $isCaseChangingStatus = $this->activityTypesService
       ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
-    $isActivityClosingTheCase = $this->extractStatusFromSubject($caseActivity->subject) === ActivityStatus::CLOSED;
+    $isActivityClosingTheCase = $this->extractStatusFromSubject($caseActivity->subject) === CaseStatus::CLOSED;
 
     return $isCaseChangingStatus && $isActivityClosingTheCase;
   }
@@ -275,9 +275,10 @@ class CRM_CiviCaseextras_CaseDurationLog {
     if (stripos($activitySubject, 'Case status changed from') !== FALSE) {
       $subjectData = explode(' ', $activitySubject);
       $newCaseStatus = $subjectData[count($subjectData) - 1];
+      $status = $this->caseStatusService->getStatusByLabel($newCaseStatus);
 
-      if (isset($this->statusGroupingsPerLabel[$newCaseStatus])) {
-        return $this->statusGroupingsPerLabel[$newCaseStatus];
+      if ($status) {
+        return $status;
       }
     }
 
