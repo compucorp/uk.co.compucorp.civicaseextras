@@ -2,6 +2,7 @@
 
 use CRM_Dictionaries_ActivityStatus as ActivityStatus;
 use CRM_Dictionaries_ActivityTypes as ActivityTypes;
+use CRM_CiviCaseextras_Services_ActivityTypesService as ActivityTypesService;
 
 /**
  * Handles the case duration log used to calculate total case durations.
@@ -21,13 +22,6 @@ class CRM_CiviCaseextras_CaseDurationLog {
   private $statusGroupingsPerLabel = array();
 
   /**
-   * Array mapping activity type id's to ther names.
-   *
-   * @var array
-   */
-  private $activityTypes = array();
-
-  /**
    * Array of cases that have been preprocessed, to be resolved once activity is
    * saved.
    *
@@ -36,13 +30,15 @@ class CRM_CiviCaseextras_CaseDurationLog {
   private $pendingCases = array();
 
   /**
-   * Singleton.
-   *
-   * @var CRM_CiviCaseextras_CaseDurationLog
+   * @var ActivityTypesService
+   *   A reference to the Activity Types Service
    */
-  private static $singleton;
+  protected $activityTypesService;
 
-  public function __construct() {
+  /**
+   * @param $activityTypesService
+   */
+  public function __construct(ActivityTypesService $activityTypesService) {
     $statuses = civicrm_api3('OptionValue', 'get', array(
       'sequential' => 1,
       'option_group_id' => 'case_status',
@@ -53,27 +49,7 @@ class CRM_CiviCaseextras_CaseDurationLog {
       $this->statusGroupingsPerLabel[$status['label']] = $status['grouping'];
     }
 
-    $activityTypes = civicrm_api3('OptionValue', 'get', array(
-      'sequential' => 1,
-      'option_group_id' => 'activity_type',
-    ));
-
-    foreach ($activityTypes['values'] as $type) {
-      $this->activityTypes[$type['value']] = $type['name'];
-    }
-  }
-
-  /**
-   * Provides single object to handle all case and activity processing.
-   *
-   * @return \CRM_CiviCaseextras_CaseDurationLog
-   */
-  public static function singleton() {
-    if (self::$singleton === NULL) {
-      self::$singleton = new CRM_CiviCaseextras_CaseDurationLog();
-    }
-
-    return self::$singleton;
+    $this->activityTypesService = $activityTypesService;
   }
 
   /**
@@ -81,18 +57,18 @@ class CRM_CiviCaseextras_CaseDurationLog {
    * be handled once the activity is actually sored in the database and we have
    * an ID for it.
    *
-   * @param array $params
+   * @param array $activity
    *   List of parameters being used to store the new activity
    */
-  public function preProcessCaseActivity(&$params) {
-    $activityType = CRM_Utils_Array::value($params['activity_type_id'], $this->activityTypes);
-    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
-    $hasParamsDefined = !empty($params['activity_date_time']) &&
-      !empty($params['case_status_id']) &&
-      !empty($params['case_id']);
+  public function preProcessCaseActivity(&$activity) {
+    $isCaseChangingStatus = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
+    $hasParamsDefined = !empty($activity['activity_date_time']) &&
+      !empty($activity['case_status_id']) &&
+      !empty($activity['case_id']);
 
     if ($isCaseChangingStatus && $hasParamsDefined) {
-      $this->pendingCases[$params['case_id']] = $params;
+      $this->pendingCases[$activity['case_id']] = $activity;
     }
   }
 
@@ -106,7 +82,8 @@ class CRM_CiviCaseextras_CaseDurationLog {
   public function postProcessCaseActivity($activityDAO) {
     if ($this->isCaseOpening($activityDAO)) {
       $this->startLog($activityDAO->id, $activityDAO->activity_date_time, $activityDAO->case_id);
-    } elseif($this->isCaseClosing($activityDAO)) {
+    }
+    elseif ($this->isCaseClosing($activityDAO)) {
       $this->endLog($activityDAO->id, $activityDAO->activity_date_time, $activityDAO->case_id);
     }
 
@@ -120,15 +97,16 @@ class CRM_CiviCaseextras_CaseDurationLog {
    *
    * @return bool
    */
-  private function isCaseOpening($activityDAO) {
-    $activityType = CRM_Utils_Array::value($activityDAO->activity_type_id, $this->activityTypes);
-    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS
-    $isCaseOpening = $activityType === ActivityTypes::OPEN_CASE;
+  private function isCaseOpening($activity) {
+    $isCaseChangingStatus = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
+    $isCaseOpening = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::OPEN_CASE);
     $isCasePending = isset($this->pendingCases[$activityDAO->case_id]);
 
     if (!$isCaseOpening && $isCaseChangingStatus && $isCasePending) {
       $caseStatusID = $this->pendingCases[$activityDAO->case_id]['case_status_id'];
-      $isCaseOpening = $activityType === $this->statuses[$caseStatusID]['grouping'] === ActivityStatus::OPENED;
+      $isCaseOpening = $this->statuses[$caseStatusID]['grouping'] === ActivityStatus::OPENED;
     }
 
     if ($isCaseOpening) {
@@ -138,9 +116,9 @@ class CRM_CiviCaseextras_CaseDurationLog {
         WHERE case_id = %1
         AND end_task IS NULL
       ";
-      $dbResult = CRM_Core_DAO::executeQuery($query, array(
-        1 => array($activityDAO->case_id, 'Integer')
-      ));
+      $dbResult = CRM_Core_DAO::executeQuery($query, [
+        1 => [$activityDAO->case_id, 'Integer']
+      ]);
 
       if ($dbResult->N === 0) {
         return TRUE;
@@ -157,9 +135,9 @@ class CRM_CiviCaseextras_CaseDurationLog {
    *
    * @return bool
    */
-  private function isCaseClosing($activityDAO) {
-    $activityType = CRM_Utils_Array::value($activityDAO->activity_type_id, $this->activityTypes);
-    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+  private function isCaseClosing($activity) {
+    $isCaseChangingStatus = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
     $isCaseClosing = FALSE;
 
     if ($isCaseChangingStatus) {
@@ -238,11 +216,12 @@ class CRM_CiviCaseextras_CaseDurationLog {
    * @return bool
    *   True if the current activity is opening the case, false otherwise
    */
-  private function wasCaseOpening($caseActivity) {
-    $activityType = CRM_Utils_Array::value($caseActivity->activity_type_id, $this->activityTypes);
-    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+  private function wasCaseOpening($activity) {
+    $isCaseChangingStatus = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
+    $isActivityOpeningTheCase  = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::OPEN_CASE);
     $isCaseStatusOpened = $this->extractStatusFromSubject($caseActivity->subject) === ActivityStatus::OPENED;
-    $isActivityOpeningTheCase = $activityType === ActivityTypes::OPEN_CASE;
 
     $changeStatusToOpen = $isCaseChangingStatus && $isCaseStatusOpened;
 
@@ -253,9 +232,9 @@ class CRM_CiviCaseextras_CaseDurationLog {
         WHERE case_id = %1
         AND end_task IS NULL
       ";
-      $dbResult = CRM_Core_DAO::executeQuery($query, array(
-        1 => array($caseActivity->case_id, 'Integer')
-      ));
+      $dbResult = CRM_Core_DAO::executeQuery($query, [
+        1 => [$caseActivity->case_id, 'Integer'],
+      ]);
 
       if ($dbResult->N === 0) {
         return TRUE;
@@ -274,9 +253,9 @@ class CRM_CiviCaseextras_CaseDurationLog {
    * @return bool
    *   True if the current activity is closing the case, false otherwise
    */
-  private function wasCaseClosing($caseActivity) {
-    $activityType = CRM_Utils_Array::value($caseActivity->activity_type_id, $this->activityTypes);
-    $isCaseChangingStatus = $activityType === ActivityTypes::CHANGE_CASE_STATUS;
+  private function wasCaseClosing($activity) {
+    $isCaseChangingStatus = $this->activityTypesService
+      ->isActivityOfGivenType($activity, ActivityTypes::CHANGE_CASE_STATUS);
     $isActivityClosingTheCase = $this->extractStatusFromSubject($caseActivity->subject) === ActivityStatus::CLOSED;
 
     return $isCaseChangingStatus && $isActivityClosingTheCase;
@@ -295,7 +274,7 @@ class CRM_CiviCaseextras_CaseDurationLog {
   private function extractStatusFromSubject($activitySubject) {
     if (stripos($activitySubject, 'Case status changed from') !== FALSE) {
       $subjectData = explode(' ', $activitySubject);
-      $newCaseStatus = $subjectData[sizeof($subjectData) - 1];
+      $newCaseStatus = $subjectData[count($subjectData) - 1];
 
       if (isset($this->statusGroupingsPerLabel[$newCaseStatus])) {
         return $this->statusGroupingsPerLabel[$newCaseStatus];
@@ -354,7 +333,7 @@ class CRM_CiviCaseextras_CaseDurationLog {
   private function getStatsGroup() {
     $customGroupResult = civicrm_api3('CustomGroup', 'get', array(
       'sequential' => 1,
-      'name' => 'Case_Stats'
+      'name' => 'Case_Stats',
     ));
 
     return array_shift($customGroupResult['values']);

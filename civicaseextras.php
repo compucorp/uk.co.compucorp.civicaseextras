@@ -2,6 +2,7 @@
 
 require_once 'civicaseextras.civix.php';
 use CRM_Civicaseextras_ExtensionUtil as E;
+use CRM_Civicaseextras_Services_ActivityTypesService as ActivityTypesService;
 
 /**
  * Implements hook_civicrm_config().
@@ -143,7 +144,9 @@ function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
  */
 function civicaseextras_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName === 'Activity' && $op == 'create') {
-    $logger = new CRM_CiviCaseextras_CaseDurationLog();
+    $activityTypesService = new ActivityTypesService();
+    $logger = new CRM_CiviCaseextras_CaseDurationLog($activityTypesService);
+
     $logger->preProcessCaseActivity($params);
   }
 }
@@ -153,7 +156,9 @@ function civicaseextras_civicrm_pre($op, $objectName, $id, &$params) {
  */
 function civicaseextras_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName === 'Activity' && $op === 'create' && !empty($objectRef->case_id)) {
-    $logger = new CRM_CiviCaseextras_CaseDurationLog();
+    $activityTypesService = new ActivityTypesService();
+    $logger = new CRM_CiviCaseextras_CaseDurationLog($activityTypesService);
+
     $logger->postProcessCaseActivity($objectRef);
   }
 }

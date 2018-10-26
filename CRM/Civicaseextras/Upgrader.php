@@ -1,5 +1,7 @@
 <?php
 
+use CRM_CiviCaseextras_Services_ActivityTypesService as ActivityTypesService;
+
 /**
  * Collection of upgrade steps.
  */
@@ -428,7 +430,7 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
       $dao = new CRM_Core_DAO_Job();
       $dao->domain_id = CRM_Core_Config::domainID();
       $dao->run_frequency = 'Daily';
-      $dao->parameters = null;
+      $dao->parameters = NULL;
       $dao->name = 'Case Duration Calculation';
       $dao->description = 'Job to update the duration of cases.';
       $dao->api_entity = 'case';
@@ -459,6 +461,8 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
    * history.
    */
   private function buildDurationLog() {
+    $activityTypesService = new ActivityTypesService();
+
     CRM_Core_DAO::executeQuery('TRUNCATE TABLE civicrm_case_duration_log');
 
     $query = "
@@ -476,7 +480,8 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
     ";
     $caseActivitiesResult = CRM_Core_DAO::executeQuery($query);
 
-    $logger = new CRM_CiviCaseextras_CaseDurationLog();
+    $logger = new CRM_CiviCaseextras_CaseDurationLog($activityTypesService);
+
     while ($caseActivitiesResult->fetch()) {
       $logger->processOldCaseActivity($caseActivitiesResult);
     }
@@ -517,7 +522,7 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
   private function createStatsCustomGroup() {
     $customGroupResult = civicrm_api3('CustomGroup', 'get', array(
       'sequential' => 1,
-      'name' => 'Case_Stats'
+      'name' => 'Case_Stats',
     ));
 
     if ($customGroupResult['count'] < 1) {
@@ -529,7 +534,7 @@ class CRM_Civicaseextras_Upgrader extends CRM_Civicaseextras_Upgrader_Base {
         'weight' => 10,
         'collapse_display' => 0,
         'style' => 'Inline',
-        'is_active' => 1
+        'is_active' => 1,
       ));
     }
 
