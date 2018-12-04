@@ -10,7 +10,8 @@
     "globals": [
       "CRM",
       "angular",
-      "inject"
+      "inject",
+      "moment"
     ]
   },
   "repository": {
