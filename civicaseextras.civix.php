@@ -1,5 +1,8 @@
 <?php
 
+use \Civi\Angular\ChangeSet as AngularChangeSet;
+use \Civi\Angular\Manager as AngularManager;
+
 // AUTO-GENERATED FILE -- Civix may overwrite any changes made to this file
 
 /**
@@ -486,8 +489,48 @@ function _civicaseextras_civix_civicrm_entityTypes(&$entityTypes) {
   ));
 }
 
-function _civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager &$angular) {
-  $changeSet = \Civi\Angular\ChangeSet::create('inject_case_outcomes')
+/**
+ * Executes the angular alterations for Civicase.
+ *
+ * @param $angular AngularManager
+ */
+function _civicaseextras_civicrm_alterAngular(AngularManager &$angular) {
+  _civicaseextras_alterAngular_addVisualAlert($angular);
+  _civicaseextras_alterAngular_appendOutcomePanel($angular);
+}
+
+/**
+ * Replaces the date column type on case lists so it displays an alert when the
+ * given date is overdue.
+ *
+ * @param $angular AngularManager
+ */
+function _civicaseextras_alterAngular_addVisualAlert (AngularManager &$angular) {
+  $changeSet = AngularChangeSet::create('display_warning_for_overdue_cases')
+    ->alterHtml('~/civicase/CaseListTable.html',
+      function (phpQueryObject $doc) {
+        $doc->find('[ng-switch-when="date"]')
+          ->html('
+            <span ng-if="!item.overdueDates[header.name]">
+              {{ CRM.utils.formatDate(item[header.name]) }}
+            </span>
+            <strong ng-if="item.overdueDates[header.name]"
+              class="text-danger">
+              {{ CRM.utils.formatDate(item[header.name]) }}
+              <i class="material-icons civicase__icon">error</i>
+            </strong>
+          ');
+      });
+  $angular->add($changeSet);
+}
+
+/**
+ * Appends the case outcomes to the case details summary.
+ *
+ * @param $angular AngularManager
+ */
+function _civicaseextras_alterAngular_appendOutcomePanel (AngularManager &$angular) {
+  $changeSet = AngularChangeSet::create('inject_case_outcomes')
     ->alterHtml('~/civicase/CaseDetails--tabs--summary--CustomData.html',
       function (phpQueryObject $doc) {
         $doc->find('civicase-masonry-grid')
