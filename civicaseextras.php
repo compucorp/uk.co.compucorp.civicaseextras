@@ -138,30 +138,36 @@ function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
   _civicaseextras_civicrm_alterAngular($angular);
 }
 
-// --- Functions below this ship commented out. Uncomment as required. ---
+/**
+ * Implements hook_civicrm_alterContent().
+ * Adds extra settings fields to the Civicase Admin Settings form.
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterContent/
+ */
+function civicaseextras_civicrm_alterContent (&$content, $context, $templateName, $form) {
+  $isViewingTheCaseAdminForm = get_class($form) === CRM_Admin_Form_Setting_Case::class;
+
+  if (!$isViewingTheCaseAdminForm) {
+    return;
+  }
+
+  $settingsTemplate = &CRM_Core_Smarty::singleton();
+  $settingsTemplateHtml = $settingsTemplate->fetchWith('CRM/Civicaseextra/Admin/Form/Settings.tpl', []);
+
+  $doc = phpQuery::newDocumentHTML($content);
+  $doc->find('table.form-layout tr:last')->append($settingsTemplateHtml);
+
+  $content = $doc->getDocument();
+}
 
 /**
  * Implements hook_civicrm_preProcess().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
+ */
 function civicaseextras_civicrm_preProcess($formName, &$form) {
+  if ($formName == 'CRM_Admin_Form_Setting_Case') {
+    $settings = $form->getVar('_settings');
+    $settings['civicaseOverdueNotificationLimit'] = CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME;
 
-} // */
-
-/**
- * Implements hook_civicrm_navigationMenu().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
- *
-function civicaseextras_civicrm_navigationMenu(&$menu) {
-  _civicaseextras_civix_insert_navigation_menu($menu, 'Mailings', array(
-    'label' => E::ts('New subliminal message'),
-    'name' => 'mailing_subliminal_message',
-    'url' => 'civicrm/mailing/subliminal',
-    'permission' => 'access CiviMail',
-    'operator' => 'OR',
-    'separator' => 0,
-  ));
-  _civicaseextras_civix_navigationMenu($menu);
-} // */
+    $form->setVar('_settings', $settings);
+  }
+}
