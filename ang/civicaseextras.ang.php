@@ -1,5 +1,9 @@
 <?php
 
+$settings = [
+  'overdueNotificationLimit' => (int) Civi::settings()->get('civicaseOverdueNotificationLimit'),
+];
+
 return [
   'js' => [
     'assetBuilder://visual-bundle.js',
@@ -13,7 +17,7 @@ return [
   'partials' => [
     'ang/civicaseextras',
   ],
-  'settings' => [],
+  'settings' => $settings,
   'requires' => [
     'crmUtil'
   ],
