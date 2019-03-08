@@ -2,6 +2,8 @@
 
 require_once 'civicaseextras.civix.php';
 use CRM_Civicaseextras_ExtensionUtil as E;
+use \Civi\Angular\ChangeSet as AngularChangeSet;
+use \Civi\Angular\Manager as AngularManager;
 
 /**
  * Implements hook_civicrm_config().
@@ -134,8 +136,49 @@ function civicaseextras_civicrm_entityTypes(&$entityTypes) {
   _civicaseextras_civix_civicrm_entityTypes($entityTypes);
 }
 
-function civicaseextras_civicrm_alterAngular(\Civi\Angular\Manager $angular) {
-  _civicaseextras_civicrm_alterAngular($angular);
+function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
+  _civicaseextras_alterAngular_addVisualAlert($angular);
+  _civicaseextras_alterAngular_appendOutcomePanel($angular);
+}
+
+/**
+ * Replaces the date column type on case lists so it displays an alert when the
+ * given date is overdue.
+ *
+ * @param $angular AngularManager
+ */
+function _civicaseextras_alterAngular_addVisualAlert (AngularManager &$angular) {
+  $changeSet = AngularChangeSet::create('display_warning_for_overdue_cases')
+    ->alterHtml('~/civicase/case/list/directives/case-list-table.directive.html',
+      function (phpQueryObject $doc) {
+        $doc->find('[ng-switch-when="date"]')
+          ->html('
+            <span ng-if="!item.overdueDates[header.name]">
+              {{ CRM.utils.formatDate(item[header.name]) }}
+            </span>
+            <strong ng-if="item.overdueDates[header.name]"
+              class="text-danger">
+              {{ CRM.utils.formatDate(item[header.name]) }}
+              <i class="material-icons civicase__icon">error</i>
+            </strong>
+          ');
+      });
+  $angular->add($changeSet);
+}
+
+/**
+ * Appends the case outcomes to the case details summary.
+ *
+ * @param $angular AngularManager
+ */
+function _civicaseextras_alterAngular_appendOutcomePanel (AngularManager &$angular) {
+  $changeSet = AngularChangeSet::create('inject_case_outcomes')
+    ->alterHtml('~/civicase/case/details/summary-tab/case-summary-custom-data.html',
+      function (phpQueryObject $doc) {
+        $doc->find('civicase-masonry-grid')
+          ->prepend('<civicase-extras-case-outcome case="item"></civicase-extras-case-outcome>');
+      });
+  $angular->add($changeSet);
 }
 
 /**
