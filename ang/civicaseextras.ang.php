@@ -1,6 +1,9 @@
 <?php
+
 /**
- * Get a list of JS files
+ * Returns a list of Civicaseextras JS files to be bundled.
+ *
+ * @return array
  */
 function getCivicaseExtrasJSFiles () {
   return array_merge(array(
@@ -9,9 +12,16 @@ function getCivicaseExtrasJSFiles () {
   ), glob_recursive(dirname(__FILE__) . '/civicaseextras/*.js'));
 }
 
-$settings = [
-  'overdueNotificationLimit' => (int) Civi::settings()->get('civicaseOverdueNotificationLimit'),
-];
+/**
+ * Returns a list of Civicaseextras settings that will be shared with the front-end.
+ *
+ * @return array
+ */
+function getCivicaseExtrasSettings () {
+  return [
+    'overdueNotificationLimit' => (int) Civi::settings()->get('civicaseOverdueNotificationLimit'),
+  ];
+}
 
 return [
   'js' => getCivicaseExtrasJSFiles(),
@@ -22,7 +32,7 @@ return [
   'partials' => [
     'ang/civicaseextras',
   ],
-  'settings' => $settings,
+  'settings' => getCivicaseExtrasSettings(),
   'requires' => [
     'crmUtil'
   ],

@@ -1,4 +1,4 @@
-<tr class="crm-case-form-block-civicaseOverdueNotificationLimit">
+<tr class="crm-case-form-block-civicase-overdue-notification-limit">
   <td class="label">{$form.civicaseOverdueNotificationLimit.label}</td>
   <td>{$form.civicaseOverdueNotificationLimit.html}<br />
     <span class="description">
