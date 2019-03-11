@@ -28,7 +28,9 @@ module.exports = function (config) {
       // angular templates
       extPath + '/ang/civicaseextras/*.html',
 
-      // Civicase Mock files
+      // Civicase files
+      civicasePath + '/ang/civicase.js',
+      civicasePath + '/ang/civicase/case/factories/format-case.factory.js',
       { pattern: civicasePath + '/ang/test/mocks/modules.mock.js' },
       { pattern: civicasePath + '/ang/test/mocks/**/*.js' },
 
