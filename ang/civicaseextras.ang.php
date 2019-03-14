@@ -19,7 +19,7 @@ function getCivicaseExtrasJSFiles () {
  */
 function getCivicaseExtrasSettings () {
   return [
-    'overdueNotificationLimit' => (int) Civi::settings()->get('civicaseOverdueNotificationLimit'),
+    'overdueNotificationLimit' => (int) Civi::settings()->get('civicaseCaseLastUpdatedNotificationLimit'),
   ];
 }
 

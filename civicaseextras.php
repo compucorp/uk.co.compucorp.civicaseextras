@@ -191,7 +191,7 @@ function _civicaseextras_alterContent_addCivicaseAdminSettingsFields (&$content)
  */
 function _civicaseextras_preProcess_addCivicaseAdminSettingsFieldsReference (&$form) {
   $settings = $form->getVar('_settings');
-  $settings['civicaseOverdueNotificationLimit'] = CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME;
+  $settings['civicaseCaseLastUpdatedNotificationLimit'] = CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME;
 
   $form->setVar('_settings', $settings);
 }
