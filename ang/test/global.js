@@ -2,6 +2,7 @@
 
 (function (CRM) {
   CRM.civicase = {};
+  CRM.civicaseextras = {};
   CRM.angular = { requires: {} };
   /**
    * Dependency Injection for civicase module, defined in ang/civicase.ang.php
