@@ -1,44 +1,52 @@
 # uk.co.compucorp.civicaseextras
 
-![Screenshot](/images/screenshot.png)
+This extension adds the following features related to cases:
 
-(*FIXME: In one or two paragraphs, describe what the extension does and why one would download it. *)
+* It displays outcome panels related to case activities.
+* It adds a red warning to cases that have not been updated in a certain amount of time.
 
-The extension is licensed under [AGPL-3.0](LICENSE.txt).
+## Technical Requirements
 
-## Requirements
+* [CiviCase 1.0.0-alpha9](https://github.com/compucorp/uk.co.compucorp.civicase) or later.
 
-* PHP v5.4+
-* CiviCRM (*FIXME: Version number*)
+## Installation
 
-## Installation (Web UI)
-
-This extension has not yet been published for installation via the web UI.
-
-## Installation (CLI, Zip)
-
-Sysadmins and developers may download the `.zip` file for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
-
-```bash
-cd <extension-dir>
-cv dl uk.co.compucorp.civicaseextras@https://github.com/FIXME/uk.co.compucorp.civicaseextras/archive/master.zip
-```
-
-## Installation (CLI, Git)
-
-Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) repo for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
-
-```bash
-git clone https://github.com/FIXME/uk.co.compucorp.civicaseextras.git
-cv en civicaseextras
-```
+* Clone this repository into the `civicrm/ext` folder.
+* Go to the extensions page `/civicrm/admin/extensions?reset=1`.
+* Refresh the list of extensions.
+* Install "CiviCase Extras".
 
 ## Usage
 
-(* FIXME: Where would a new user navigate to get started? What changes would they see? *)
+### Case Outcomes
 
-## Known Issues
+#### Configure
 
-(* FIXME *)
+1. Create a new Activity Type Category called "Outcome". The value must be "outcome":
+`/civicrm/admin/options/activity_category?reset=1`
+2. Assign the "Outcome" category to existing or new activity types:
+`/civicrm/admin/options/activity_type?reset=1`
+3. Update the activity status so they accept the outcome activity types.
+`/civicrm/admin/options/activity_status?reset=1`. Without this change, the activities
+won't be able to be created or updated.
+  * Edit some status, for example "Scheduled", "Completed", and "Available".
+  * For the "Activity Category" field add the "Outcome" category.
+  * Save.
+4. Create new custom fields for outcomes:
+`/civicrm/admin/custom/group?action=add&reset=1`
+  * *Used for:* Select "Activities".
+  * Select the activity types that have the "Outcome" category.
+  * Add as many fields as needed
+
+#### Final notes:
+
+* There will be an outcome panel for each activity type with the "Outcome" category.
+* The name of the outcome panel will be the activity type label.
+* The custom field values will be shown inside of the panels.
+
+### Case last modified warning
+
+This will be done automatically for cases last modified in the last 90 days, but
+can be configured in the CiviCase settings:
+
+`/civicrm/admin/setting/case?reset=1`.
