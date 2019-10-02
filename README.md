@@ -36,7 +36,7 @@ can't be created.
 `/civicrm/admin/custom/group?action=add&reset=1`
   * *Used for:* Select "Activities".
   * Select the activity types that have the "Outcome" category.
-  * Add required fields
+  * Add required fields.
 
 #### Final notes:
 
