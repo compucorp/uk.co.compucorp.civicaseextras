@@ -27,22 +27,22 @@ This extension adds the following features related to cases:
 2. Assign the "Outcome" category to existing or new activity types:
 `/civicrm/admin/options/activity_type?reset=1`
 3. Update the activity status so they accept the outcome activity types.
-`/civicrm/admin/options/activity_status?reset=1`. Without this change, the activities
-won't be able to be created or updated.
-  * Edit some status, for example "Scheduled", "Completed", and "Available".
+`/civicrm/admin/options/activity_status?reset=1`. Without this change the activities
+can't be created.
+  * Edit some status, for example "Scheduled", "Completed", or "Available".
   * For the "Activity Category" field add the "Outcome" category.
   * Save.
 4. Create new custom fields for outcomes:
 `/civicrm/admin/custom/group?action=add&reset=1`
   * *Used for:* Select "Activities".
   * Select the activity types that have the "Outcome" category.
-  * Add as many fields as needed
+  * Add required fields
 
 #### Final notes:
 
 * There will be an outcome panel for each activity type with the "Outcome" category.
 * The name of the outcome panel will be the activity type label.
-* The custom field values will be shown inside of the panels.
+* The custom field values will be shown inside the panels.
 
 ### Case last modified warning
 
