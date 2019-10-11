@@ -24,4 +24,7 @@
   <civix>
     <namespace>CRM/Civicaseextras</namespace>
   </civix>
+  <requires>
+    <ext>uk.co.compucorp.civicase</ext>
+  </requires>
 </extension>
