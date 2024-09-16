@@ -75,7 +75,7 @@ function _civicaseextras_alterContent_addCivicaseAdminSettingsFields (&$content)
   $settingsTemplateHtml = _civicaseextras_getTemplateContent('CRM/Civicaseextra/Admin/Form/Settings.tpl');
 
   $doc = phpQuery::newDocumentHTML($content);
-  $doc->find('table.form-layout tr:last')->append($settingsTemplateHtml);
+  $doc->find('table.form-layout-compressed tr:last')->append($settingsTemplateHtml);
 
   $content = $doc->getDocument();
 }
