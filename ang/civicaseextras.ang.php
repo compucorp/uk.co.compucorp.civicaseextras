@@ -9,11 +9,11 @@ use CRM_Civicase_Helper_GlobRecursive as GlobRecursive;
  */
 function getCivicaseExtrasJSFiles () {
   return array_merge([
-    'assetBuilder://visual-bundle.js',
+    Civi::service('asset_builder')->getUrl('visual-bundle.js'),
     'ang/civicaseextras.js'
   ], GlobRecursive::getRelativeToExtension(
     'uk.co.compucorp.civicaseextras',
-    'ang/civicase-base/*.js'
+    'ang/civicaseextras/*.js'
   ));
 }
 
@@ -31,7 +31,7 @@ function getCivicaseExtrasSettings () {
 return [
   'js' => getCivicaseExtrasJSFiles(),
   'css' => [
-    'assetBuilder://visual-bundle.css',
+    Civi::service('asset_builder')->getUrl('visual-bundle.css'),
     'css/*.css',
   ],
   'partials' => [
