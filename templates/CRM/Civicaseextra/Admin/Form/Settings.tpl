@@ -1,4 +1,4 @@
-<tr class="crm-case-form-block-civicase-overdue-notification-limit">
+{* <tr class="crm-case-form-block-civicase-overdue-notification-limit">
   <td class="label">{$form.civicaseCaseLastUpdatedNotificationLimit.label}</td>
   <td>{$form.civicaseCaseLastUpdatedNotificationLimit.html}<br />
     <span class="description">
@@ -7,4 +7,4 @@
       on the last updated date.{/ts}
     </span>
   </td>
-</tr>
+</tr> *}

@@ -38,6 +38,9 @@ function civicaseextras_civicrm_enable() {
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterAngular/
  */
 function civicaseextras_civicrm_alterAngular(AngularManager $angular) {
+  $loader = Civi::service('angularjs.loader');
+  $loader->addModules(['civicaseextras']);
+
   _civicaseextras_alterAngular_addVisualAlert($angular);
   _civicaseextras_alterAngular_appendOutcomePanel($angular);
 }
