@@ -142,3 +142,18 @@ function _civicaseextras_getTemplateContent ($templatePath, $vars = []) {
 
   return $smarty->fetchWith($templatePath, $vars);
 }
+
+/**
+ * Implements hook_civicrm_pageRun().
+ *
+ * @param CRM_Core_Page $page
+ */
+function civicaseextras_civicrm_pageRun($page): void {
+  $pageName = $page->getVar('_name');
+  if ($pageName != 'CRM_Civicase_Page_CaseAngular') {
+    return;
+  }
+
+  $loader = Civi::service('angularjs.loader');
+  $loader->addModules(['civicaseextras']);
+}
