@@ -17,17 +17,6 @@ function getCivicaseExtrasJSFiles () {
   ));
 }
 
-/**
- * Returns a list of Civicaseextras settings that will be shared with the front-end.
- *
- * @return array
- */
-function getCivicaseExtrasSettings () {
-  return [
-    'overdueNotificationLimit' => (int) Civi::settings()->get('civicaseCaseLastUpdatedNotificationLimit'),
-  ];
-}
-
 return [
   'js' => getCivicaseExtrasJSFiles(),
   'css' => [
@@ -37,7 +26,7 @@ return [
   'partials' => [
     'ang/civicaseextras',
   ],
-  'settings' => getCivicaseExtrasSettings(),
+  'settingsFactory' => ['CRM_Civicaseextras_Settings', 'getAll'],
   'requires' => [
     'crmUtil'
   ],
